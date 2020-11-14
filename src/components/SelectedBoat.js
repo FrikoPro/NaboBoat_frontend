@@ -12,15 +12,15 @@ const SelectedBoat = () => {
 			<Card>
 				<Row>
 					<Col>
-						<Card.Title>{boatState.Name}</Card.Title>
+						<Card.Title>{boatState.name}</Card.Title>
 					</Col>
 				</Row>
 
 				<Card.Body>
 					<Row>
 						<Col>
-							<p>latitude: {boatState.Latitude}</p>
-							<p>longitude: {boatState.Longitude}</p>
+							<p>latitude: {boatState.latitude}</p>
+							<p>longitude: {boatState.longitude}</p>
 						</Col>
 						<Col xl={1} xs={3}>
 							<Button>Ring</Button>
