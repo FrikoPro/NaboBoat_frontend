@@ -22,7 +22,10 @@ const InitMap = () => {
 			{boatsState.map((boat, i) => (
 				<Marker
 					key={i}
-					position={{ lat: boat.latitude, lng: boat.longitude }}
+					position={{
+						lat: parseFloat(boat.latitude),
+						lng: parseFloat(boat.longitude),
+					}}
 					onClick={() => setBoat(boat)}
 				/>
 			))}
