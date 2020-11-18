@@ -54,8 +54,8 @@ export const BoatProvider = (props) => {
 			_onMessageArrived
 		); // mqtt.connect(host, port, clientId, _onConnectionLost, _onMessageArrived)
 		c.connect({
-			userName: process.env.MQTT_USERNAME,
-			password: process.env.MQTT_PASSWORD,
+			userName: process.env.REACT_APP_MQTT_USERNAME,
+			password: process.env.REACT_APP_MQTT_PASSWORD,
 			onSuccess: () => {
 				console.log('connected');
 				c.subscribe('naboBåtData/#');
@@ -78,7 +78,7 @@ export const BoatProvider = (props) => {
 		var boatsTemp = boats;
 		const index = boats.findIndex((element) => element.id === path[1]);
 
-		if (index != -1) {
+		if (index !== -1) {
 			console.log('found boat');
 			boatsTemp[index][path[2]] = message.payloadString;
 		} else {
