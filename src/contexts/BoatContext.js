@@ -24,7 +24,7 @@ export const BoatProvider = (props) => {
 		},
 	]);
 
-	const [boat, setBoat] = useState(null);
+	const [selectedBoat, setBoat] = useState('');
 
 	const [client, setClient] = useState(null);
 
@@ -45,7 +45,7 @@ export const BoatProvider = (props) => {
 			password: process.env.REACT_APP_MQTT_PASSWORD,
 			onSuccess: () => {
 				console.log('connected');
-				c.subscribe('naboBåtData/#');
+				c.subscribe('2a003b000a47373336323230/#');
 			},
 			useSSL: false,
 		});
@@ -60,36 +60,44 @@ export const BoatProvider = (props) => {
 	};
 
 	const _onMessageArrived = (message) => {
-		console.log(message);
-		if (message == null) return;
-		const path = message.topic.split('/');
-		var boatsTemp = boats;
-		const index = boats.findIndex((element) => element.id === path[1]);
+		let data = JSON.parse(message.payloadString);
 
-		if (index !== -1) {
-			boatsTemp[index][path[2]] = message.payloadString;
+		const id = message.topic.split('/')[0];
+		data['id'] = id;
+		// console.log(data);
+		var boatsTemp = boats;
+		const index = boats.findIndex((element) => element.id === data.id);
+
+		if (index === -1) {
+			boatsTemp.push(data);
 		} else {
-			boatsTemp = [
-				...boatsTemp,
-				{ id: path[1], [path[2]]: message.payloadString },
-			];
+			boatsTemp.splice(index, 1, data);
 		}
 
 		setBoats([...boatsTemp]);
+		// console.log(boatsTemp);
 	};
 
-	const sendMessage = (boatId) => {
+	const sendMessage = (boat) => {
+		// let index = boats.findIndex((element) => element.id === boat.id);
+		boat.unlock = !boat.unlock;
+		// let boatsTemp = boats;
+		// boatsTemp.splice(index, 1, boat);
+
 		const testMessage = mqtt.parsePayload(
-			'naboBåtData/' + boatId + '/unlock',
-			'false'
+			boat.id + '/data',
+			JSON.stringify(boat)
 		);
 		client.send(testMessage);
+
+		// setBoats([...boatsTemp]);
+		// console.log(boat);
 	};
 
 	return (
 		<BoatContext.Provider
 			value={{
-				boat: [boat, setBoat],
+				boat: [selectedBoat, setBoat],
 				boats: [boats, setBoats],
 				sendMessage: sendMessage,
 			}}>

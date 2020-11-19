@@ -12,7 +12,7 @@ const SelectedBoat = () => {
 			<Card>
 				<Row>
 					<Col>
-						<Card.Title>{boatState.name}</Card.Title>
+						<Card.Title>{boatState.id}</Card.Title>
 					</Col>
 				</Row>
 
@@ -29,7 +29,7 @@ const SelectedBoat = () => {
 
 					<Row className="text-center">
 						<Col xl={12}>
-							<Button onClick={() => sendMessage(boat[0].id)}>Start Tur</Button>
+							<Button onClick={() => sendMessage(boat[0])}>Start Tur</Button>
 						</Col>
 					</Row>
 				</Card.Body>
@@ -37,7 +37,7 @@ const SelectedBoat = () => {
 		</Container>
 	);
 
-	return boat[0] !== null ? renderCard() : <></>;
+	return boat[0] !== '' ? renderCard() : <></>;
 };
 
 export default SelectedBoat;

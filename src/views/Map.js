@@ -26,7 +26,7 @@ const InitMap = () => {
 						lat: parseFloat(boat.latitude),
 						lng: parseFloat(boat.longitude),
 					}}
-					onClick={() => setBoat({ ...boat })}
+					onClick={() => setBoat(boat)}
 				/>
 			))}
 		</GoogleMap>
