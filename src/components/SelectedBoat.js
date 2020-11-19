@@ -3,7 +3,7 @@ import { Container, Row, Col, Button, Card } from 'react-bootstrap';
 import { BoatContext } from '../contexts/BoatContext';
 
 const SelectedBoat = () => {
-	const { boat } = useContext(BoatContext);
+	const { boat, sendMessage } = useContext(BoatContext);
 
 	const [boatState, setBoat] = boat;
 
@@ -29,7 +29,7 @@ const SelectedBoat = () => {
 
 					<Row className="text-center">
 						<Col xl={12}>
-							<Button>Start Tur</Button>
+							<Button onClick={() => sendMessage(boat[0].id)}>Start Tur</Button>
 						</Col>
 					</Row>
 				</Card.Body>
@@ -37,7 +37,7 @@ const SelectedBoat = () => {
 		</Container>
 	);
 
-	return boat[0] !== '' ? renderCard() : <></>;
+	return boat[0] !== null ? renderCard() : <></>;
 };
 
 export default SelectedBoat;

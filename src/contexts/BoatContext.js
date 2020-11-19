@@ -8,36 +8,23 @@ export const BoatProvider = (props) => {
 			id: 'boat2345',
 			latitude: 59.903295,
 			longitude: 10.753708,
+			unlock: false,
 		},
 		{
 			id: 'boat3535',
 			latitude: 59.907672,
 			longitude: 10.726348,
+			unlock: false,
 		},
 		{
 			id: 'boat2343',
 			latitude: 59.907217,
 			longitude: 10.726359,
+			unlock: false,
 		},
 	]);
 
-	const [boat, setBoat] = useState('');
-
-	// useEffect(() => {
-	// 	var devices = [];
-	// 	var url = `https://api.particle.io/v1/devices?access_token=2ee345d875011fc4f34c904b226dd7f59b9c164e`;
-	// 	Axios.get(url).then((response) => {
-	// 		response.data.map((device) => {
-	// 			console.log('deviceId: ');
-	// 			Axios.get(`http://dweet.io/get/latest/dweet/for/${device.id}`).then(
-	// 				(response) => {
-	// 					console.log(response.data.with[0].content);
-	// 					setBoats([...boats, response.data.with[0].content]);
-	// 				}
-	// 			);
-	// 		});
-	// 	});
-	// }, []);
+	const [boat, setBoat] = useState(null);
 
 	const [client, setClient] = useState(null);
 
@@ -73,28 +60,39 @@ export const BoatProvider = (props) => {
 	};
 
 	const _onMessageArrived = (message) => {
+		console.log(message);
 		if (message == null) return;
 		const path = message.topic.split('/');
 		var boatsTemp = boats;
 		const index = boats.findIndex((element) => element.id === path[1]);
 
 		if (index !== -1) {
-			console.log('found boat');
 			boatsTemp[index][path[2]] = message.payloadString;
 		} else {
 			boatsTemp = [
 				...boatsTemp,
 				{ id: path[1], [path[2]]: message.payloadString },
 			];
-			console.log('boatsTemp: ', boatsTemp);
 		}
 
 		setBoats([...boatsTemp]);
 	};
 
+	const sendMessage = (boatId) => {
+		const testMessage = mqtt.parsePayload(
+			'naboBåtData/' + boatId + '/unlock',
+			'false'
+		);
+		client.send(testMessage);
+	};
+
 	return (
 		<BoatContext.Provider
-			value={{ boat: [boat, setBoat], boats: [boats, setBoats] }}>
+			value={{
+				boat: [boat, setBoat],
+				boats: [boats, setBoats],
+				sendMessage: sendMessage,
+			}}>
 			{props.children}
 		</BoatContext.Provider>
 	);
