@@ -3,9 +3,29 @@ import { Container, Row, Col, Button, Card } from 'react-bootstrap';
 import { BoatContext } from '../contexts/BoatContext';
 
 const SelectedBoat = () => {
-	const { boat, sendMessage } = useContext(BoatContext);
+	const { boat, sendMessage, recievedMessage } = useContext(BoatContext);
 
 	const [boatState, setBoat] = boat;
+
+	const [recievedMessageState, setRecievedMessage] = recievedMessage;
+
+	const renderButtonOrLoadingIcon = () => {
+		if (recievedMessageState === boatState.unlock) {
+			return (
+				<Button
+					className={boatState.unlock ? 'bg-danger' : 'bg-primary'}
+					onClick={() => sendMessage(boatState)}>
+					{boatState.unlock ? 'Avslutt tur' : 'Start tur'}
+				</Button>
+			);
+		} else {
+			return (
+				<div class="spinner-grow text-primary" role="status">
+					<span class="sr-only">Loading...</span>
+				</div>
+			);
+		}
+	};
 
 	const renderCard = () => (
 		<Container xl={1} className="fixed-bottom">
@@ -22,15 +42,10 @@ const SelectedBoat = () => {
 							<p>latitude: {boatState.latitude}</p>
 							<p>longitude: {boatState.longitude}</p>
 						</Col>
-						<Col xl={1} xs={3}>
-							<Button>Ring</Button>
-						</Col>
 					</Row>
 
 					<Row className="text-center">
-						<Col xl={12}>
-							<Button onClick={() => sendMessage(boat[0])}>Start Tur</Button>
-						</Col>
+						<Col xl={12}>{renderButtonOrLoadingIcon()}</Col>
 					</Row>
 				</Card.Body>
 			</Card>

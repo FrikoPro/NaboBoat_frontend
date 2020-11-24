@@ -1,30 +1,14 @@
 import { useState, createContext, useEffect } from 'react';
+import Axios from 'axios';
 import * as mqtt from 'react-paho-mqtt';
 export const BoatContext = createContext();
 
 export const BoatProvider = (props) => {
-	const [boats, setBoats] = useState([
-		{
-			id: 'boat2345',
-			latitude: 59.903295,
-			longitude: 10.753708,
-			unlock: false,
-		},
-		{
-			id: 'boat3535',
-			latitude: 59.907672,
-			longitude: 10.726348,
-			unlock: false,
-		},
-		{
-			id: 'boat2343',
-			latitude: 59.907217,
-			longitude: 10.726359,
-			unlock: false,
-		},
-	]);
+	const [boats, setBoats] = useState([]);
 
 	const [selectedBoat, setBoat] = useState('');
+
+	const [recievedMessage, setRecievedMessage] = useState('');
 
 	const [client, setClient] = useState(null);
 
@@ -60,38 +44,50 @@ export const BoatProvider = (props) => {
 	};
 
 	const _onMessageArrived = (message) => {
-		let data = JSON.parse(message.payloadString);
-
-		const id = message.topic.split('/')[0];
-		data['id'] = id;
-		// console.log(data);
+		const topicPath = message.topic.split('/');
+		const id = topicPath[0];
+		const index = boats.findIndex((element) => element.id === id);
 		var boatsTemp = boats;
-		const index = boats.findIndex((element) => element.id === data.id);
 
-		if (index === -1) {
-			boatsTemp.push(data);
-		} else {
-			boatsTemp.splice(index, 1, data);
+		if (topicPath[1] === 'lastWill') {
+			if (index !== -1) {
+				boatsTemp[index]['lastWill'] = true;
+			}
+		} else if (topicPath[1] === 'data') {
+			let data = JSON.parse(message.payloadString);
+
+			data['id'] = id;
+
+			if (index === -1) {
+				boatsTemp.push(data);
+			} else {
+				boatsTemp.splice(index, 1, data);
+			}
+		} else if (topicPath[1] === 'confirmStatus') {
+			setRecievedMessage(message.payloadString === 'locked' ? false : true);
+			return;
 		}
 
 		setBoats([...boatsTemp]);
-		// console.log(boatsTemp);
 	};
 
 	const sendMessage = (boat) => {
-		// let index = boats.findIndex((element) => element.id === boat.id);
 		boat.unlock = !boat.unlock;
-		// let boatsTemp = boats;
-		// boatsTemp.splice(index, 1, boat);
+
+		var url = 'http://www.dweet.io/dweet/for/2a003b000a47373336323230?unlock=';
+
+		url += boat.unlock ? '1' : '0';
+
+		Axios.get(url).then((response) => {
+			console.log(response.data);
+		});
 
 		const testMessage = mqtt.parsePayload(
 			boat.id + '/data',
-			JSON.stringify(boat)
+			JSON.stringify(boat),
+			2
 		);
 		client.send(testMessage);
-
-		// setBoats([...boatsTemp]);
-		// console.log(boat);
 	};
 
 	return (
@@ -100,6 +96,7 @@ export const BoatProvider = (props) => {
 				boat: [selectedBoat, setBoat],
 				boats: [boats, setBoats],
 				sendMessage: sendMessage,
+				recievedMessage: [recievedMessage, setRecievedMessage],
 			}}>
 			{props.children}
 		</BoatContext.Provider>
